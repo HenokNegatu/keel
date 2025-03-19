@@ -2,7 +2,7 @@ mod models;
 mod utils;
 
 use models::{PackageManager, Project};
-use utils::read_input;
+use crate::utils::util_functions::{read_input, create_folder_and_file};
 
 fn main() {
     let name = read_input("Enter project name: ");
@@ -54,6 +54,12 @@ fn main() {
     println!("Authors: {:?}", project.authors);
     println!("License: {}", project.license);
     println!("Python Version: {}", project.python_version);
+
+    match create_folder_and_file(project.name.as_str()) {
+        Ok(_) => (),
+        Err(err) => println!("Error creating folder and file: {}", err),
+    }
+
     if let Some(env) = &project.conda_env_name {
         println!("Conda Env: {}", env);
     }
