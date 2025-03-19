@@ -1,7 +1,8 @@
-use std::io;
+use std::{io, process::Command};
 use std::fs::{self, File};
 use std::io::Write;
 use crate::utils::sample_text;
+
 
 pub fn read_input(prompt: &str) -> String {
     let mut input = String::new();
@@ -32,5 +33,35 @@ pub fn create_folder_and_file(folder_path: &str) -> std::io::Result<()> {
 
     println!("Folder and file created successfully at: {}", file_path);
 
+    Ok(())
+}
+
+pub fn git_init(folder_path: &str) -> std::io::Result<()> {
+    let output = Command::new("git")
+        .arg("init")
+        .current_dir(folder_path)
+        .output()?;
+
+    if output.status.success() {
+        println!("Git repository initialized successfully.");
+    } else {
+        println!("Failed to initialize Git repository.");
+    }
+
+    Ok(())
+}
+
+pub fn create_gitignore(folder_path: &str) -> std::io::Result<()> {
+    let file_path = format!("./{}/.gitignore", folder_path);
+
+    let mut file = File::create(&file_path)?;
+    
+    file.write_all(b"venv\n")?;
+    file.write_all(b"__pycache__\n")?;
+    file.write_all(b"dist\n")?;
+    file.write_all(b"build\n")?;
+    file.write_all(b"TODO.md\n")?;
+
+    println!("Gitignore file created successfully at: {}", file_path);
     Ok(())
 }

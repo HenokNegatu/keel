@@ -2,7 +2,7 @@ mod models;
 mod utils;
 
 use models::{PackageManager, Project};
-use crate::utils::util_functions::{read_input, create_folder_and_file};
+use crate::utils::util_functions::{read_input, create_folder_and_file, git_init, create_gitignore};
 
 fn main() {
     let name = read_input("Enter project name: ");
@@ -58,6 +58,14 @@ fn main() {
     match create_folder_and_file(project.name.as_str()) {
         Ok(_) => (),
         Err(err) => println!("Error creating folder and file: {}", err),
+    }
+
+    match git_init(project.name.as_str()) {
+        Ok(_) => match create_gitignore(project.name.as_str()) {
+            Ok(_) => (),
+            Err(err) => println!("Error creating gitignore: {}", err),
+        },
+        Err(err) => println!("Error initializing Git: {}", err),
     }
 
     if let Some(env) = &project.conda_env_name {
