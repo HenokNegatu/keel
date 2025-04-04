@@ -3,7 +3,8 @@ mod utils;
 mod executor;
 
 use executor::executor::create_venv;
-use models::{PackageManager, Project};
+use models::{PackageManager, Project, ProjectConfig, ProjectMetaData, ToolSettings};
+use utils::util_functions::create_project_toml;
 use crate::utils::util_functions::{read_input, create_folder_and_file, git_init, create_gitignore};
 
 fn main() {
@@ -72,12 +73,35 @@ fn main() {
         Err(err) => println!("Error initializing Git: {}", err),
     }
 
-    if let Some(env) = &project.conda_env_name {
+    let config = ProjectConfig {
+        project: ProjectMetaData {
+            metadata: Project{
+                name: project.name,
+                version: project.version,
+                authors: project.authors,
+                license: project.license,
+                python_version: project.python_version,
+                conda_env_name: project.conda_env_name,
+                package_manager: PackageManager::Pip //useless must be omitted
+            },
+            description: "A Python project".to_string()
+        },
+        tool: ToolSettings {
+                package_manager: project.package_manager,
+           
+        },
+    };
+    match create_project_toml(&config, &config.project.metadata.name.as_str()) {
+        Ok(_) =>{},
+        Err(e) => eprintln!("{}", e)
+    };
+
+    if let Some(env) = &config.project.metadata.conda_env_name {
         println!("Conda Env: {}", env);
     }
     println!(
         "Package Manager: {}",
-        match project.package_manager {
+        match config.project.metadata.package_manager {
             PackageManager::Pip => "Pip",
             PackageManager::Conda => "Conda",
         }
