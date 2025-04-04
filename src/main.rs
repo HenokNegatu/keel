@@ -1,6 +1,8 @@
 mod models;
 mod utils;
+mod executor;
 
+use executor::executor::create_venv;
 use models::{PackageManager, Project};
 use crate::utils::util_functions::{read_input, create_folder_and_file, git_init, create_gitignore};
 
@@ -24,9 +26,9 @@ fn main() {
     let conda_env_name = match package_manager {
         PackageManager::Pip => None,
         PackageManager::Conda => {
-            let env_name = read_input("Enter Conda environment name: ");
+            let env_name = read_input(format!("Enter Conda environment name: (default: {})", name).as_str());
             if env_name.is_empty() {
-                panic!("Conda environment name cannot be empty");
+                Some(name.clone())
             } else {
                 Some(env_name)
             }
@@ -54,6 +56,8 @@ fn main() {
     println!("Authors: {:?}", project.authors);
     println!("License: {}", project.license);
     println!("Python Version: {}", project.python_version);
+
+    create_venv(&project.name, &project.package_manager, &project.conda_env_name);
 
     match create_folder_and_file(project.name.as_str()) {
         Ok(_) => (),
