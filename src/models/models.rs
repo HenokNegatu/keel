@@ -1,6 +1,7 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use clap::{Parser, Subcommand};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum PackageManager {
     Pip,
     Conda,
@@ -16,7 +17,7 @@ impl PackageManager {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Project {
     pub name: String,
     pub version: String,
@@ -28,19 +29,33 @@ pub struct Project {
     pub package_manager: PackageManager,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ProjectConfig {
     pub project: ProjectMetaData,
     pub tool: ToolSettings,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ProjectMetaData {
     pub metadata: Project,
     pub description: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ToolSettings {
     pub package_manager: PackageManager,
+}
+
+#[derive(Parser)]
+#[command(name = "keel")]
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+ New,
+ Activate,
+ Deactivate   
 }
