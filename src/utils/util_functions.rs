@@ -1,4 +1,4 @@
-use crate::models::ProjectConfig;
+use crate::models::models::ProjectConfig;
 use crate::utils::sample_text;
 use std::fs::{self, File};
 use std::io::Write;

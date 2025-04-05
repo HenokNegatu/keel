@@ -1,4 +1,4 @@
-use crate::models::PackageManager;
+use crate::models::models::PackageManager;
 use std::process::Command;
 
 pub fn create_venv(project_name: &str, package_manager: &PackageManager, env_name: &Option<String>) {

@@ -6,7 +6,7 @@ use core::panic;
 use crate::utils::util_functions::{create_folder_and_file, create_gitignore, git_init};
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 use executor::executor::create_venv;
-use models::{PackageManager, Project, ProjectConfig, ProjectMetaData, ToolSettings};
+use models::models::{PackageManager, Project, ProjectConfig, ProjectMetaData, ToolSettings};
 use utils::util_functions::create_project_toml;
 
 fn main() {
