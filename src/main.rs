@@ -1,39 +1,67 @@
+mod executor;
 mod models;
 mod utils;
-mod executor;
+use core::panic;
 
+use crate::utils::util_functions::{create_folder_and_file, create_gitignore, git_init};
+use dialoguer::{theme::ColorfulTheme, Input, Select};
 use executor::executor::create_venv;
 use models::{PackageManager, Project, ProjectConfig, ProjectMetaData, ToolSettings};
 use utils::util_functions::create_project_toml;
-use crate::utils::util_functions::{read_input, create_folder_and_file, git_init, create_gitignore};
 
 fn main() {
-    let name = read_input("Enter project name: ");
-    let version = read_input("Enter version: ");
-    let authors_input = read_input("Enter authors (comma-separated): ");
-    let license = read_input("Enter license: ");
-    let python_version = read_input("Enter Python version: ");
-    let mut package_manager_input = read_input("Enter package manager (pip/conda): ");
+    let name = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Project Name?")
+        .default("myProject".to_string())
+        .interact_text()
+        .unwrap();
 
-    let package_manager = loop {
-        if let Some(pm) = PackageManager::from_str(&package_manager_input) {
-            break pm;
+    let version = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Project Version?")
+        .default("0.1.0".to_string())
+        .interact_text()
+        .unwrap();
+
+    let authors_input: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Enter authors (comma-separated)")
+        .interact_text()
+        .unwrap();
+
+    let license: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Project license")
+        .default("MIT".to_string())
+        .interact_text()
+        .unwrap();
+
+    let python_version: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Enter Python version")
+        .default("3.11".into()) // optional default
+        .interact_text()
+        .unwrap();
+
+    let selections = &["pip", "conda"];
+    let package_manager_input = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose project type")
+        .items(selections)
+        .interact()
+        .unwrap();
+
+    let package_manager =
+        if let Some(pm) = PackageManager::from_str(selections[package_manager_input]) {
+            pm
         } else {
-            println!("Invalid input. Please enter 'pip' or 'conda'.");
-            package_manager_input = read_input("Enter package manager (pip/conda): ");
-        }
-    };
+            panic!("Invalid input. Please select 'pip' or 'conda'.");
+        };
 
     let conda_env_name = match package_manager {
         PackageManager::Pip => None,
-        PackageManager::Conda => {
-            let env_name = read_input(format!("Enter Conda environment name: (default: {})", name).as_str());
-            if env_name.is_empty() {
-                Some(name.clone())
-            } else {
-                Some(env_name)
-            }
-        }
+        PackageManager::Conda => Some(
+            Input::with_theme(&ColorfulTheme::default())
+                .with_prompt("Conda environment Name?")
+                .default(name.clone())
+                .interact_text()
+                .unwrap(),
+        ),
     };
 
     let authors: Vec<String> = authors_input
@@ -58,7 +86,11 @@ fn main() {
     println!("License: {}", project.license);
     println!("Python Version: {}", project.python_version);
 
-    create_venv(&project.name, &project.package_manager, &project.conda_env_name);
+    create_venv(
+        &project.name,
+        &project.package_manager,
+        &project.conda_env_name,
+    );
 
     match create_folder_and_file(project.name.as_str()) {
         Ok(_) => (),
@@ -75,25 +107,24 @@ fn main() {
 
     let config = ProjectConfig {
         project: ProjectMetaData {
-            metadata: Project{
+            metadata: Project {
                 name: project.name,
                 version: project.version,
                 authors: project.authors,
                 license: project.license,
                 python_version: project.python_version,
                 conda_env_name: project.conda_env_name,
-                package_manager: PackageManager::Pip //useless must be omitted
+                package_manager: PackageManager::Pip, //useless must be omitted
             },
-            description: "A Python project".to_string()
+            description: "A Python project".to_string(),
         },
         tool: ToolSettings {
-                package_manager: project.package_manager,
-           
+            package_manager: project.package_manager,
         },
     };
     match create_project_toml(&config, &config.project.metadata.name.as_str()) {
-        Ok(_) =>{},
-        Err(e) => eprintln!("{}", e)
+        Ok(_) => {}
+        Err(e) => eprintln!("{}", e),
     };
 
     if let Some(env) = &config.project.metadata.conda_env_name {

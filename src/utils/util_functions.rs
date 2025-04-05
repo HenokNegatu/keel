@@ -4,14 +4,6 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::{io, process::Command};
 
-pub fn read_input(prompt: &str) -> String {
-    let mut input = String::new();
-    println!("{}", prompt);
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-    input.trim().to_string()
-}
 
 pub fn create_folder_and_file(folder_path: &str) -> std::io::Result<()> {
     let src_folder_path = format!("{}/src", folder_path);
