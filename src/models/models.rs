@@ -17,33 +17,34 @@ impl PackageManager {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Project {
-    pub name: String,
-    pub version: String,
-    pub authors: Vec<String>,
-    pub license: String,
-    pub python_version: String,
-    pub conda_env_name: Option<String>,
-    #[serde(skip_serializing)]
-    pub package_manager: PackageManager,
+
+impl Default for PackageManager {
+    fn default() -> Self {
+        PackageManager::Pip  // Default to pip
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProjectConfig {
-    pub project: ProjectMetaData,
+    pub metadata: ProjectMetaData,
     pub tool: ToolSettings,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProjectMetaData {
-    pub metadata: Project,
+    pub name: String,
+    pub version: String,
+    pub authors: Vec<String>,
+    pub license: String,
     pub description: String,
+    pub python_version: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct ToolSettings {
+    #[serde(default)]
     pub package_manager: PackageManager,
+    pub conda_env_name: Option<String>,
 }
 
 #[derive(Parser)]
