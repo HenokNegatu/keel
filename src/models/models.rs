@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use clap::{Parser, Subcommand};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum PackageManager {
     Pip,
     Conda,
