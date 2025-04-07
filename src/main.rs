@@ -4,7 +4,7 @@ mod utils;
 
 use crate::models::models::{Cli, Commands};
 use clap::Parser;
-use commands::{new::new, activator::activate};
+use commands::{activator::activate, deactivator::deactiate, new::new};
 
 use std::process;
 fn main() {
@@ -12,7 +12,7 @@ fn main() {
     match &cli.command {
         Commands::New => new(),
         Commands::Activate => activate(),
-        Commands::Deactivate => println!("deactiate")
+        Commands::Deactivate => deactiate(),
     }
     process::exit(0);
     
