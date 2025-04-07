@@ -1,3 +1,4 @@
+use colored::Colorize;
 use crate::models::models::{PackageManager, ProjectConfig};
 use std::{fs, process::Command, process::Stdio};
 
@@ -6,22 +7,22 @@ pub fn activate() {
     let config = match toml::from_str::<ProjectConfig>(config_str.as_str()) {
         Ok(output) => {
             if output.tool.package_manager == PackageManager::Conda && output.tool.conda_env_name == None {
-                panic!("Oops! `project.toml` [tool] section must have been tampered with!")
+                panic!("{}", "Oops! `project.toml` [tool] section must have been tampered with!".yellow())
             }
             output},
-        Err(e) => panic!("error reading {}", e),
+        Err(e) => panic!("error reading {}", e.to_string().red()),
     };
     match config.tool.package_manager {
         PackageManager::Conda => {
             match conda_activate(&config.tool.conda_env_name.unwrap()) {
-                Ok(_) => println!("activated!"),
-                Err(e) => eprintln!("{}", e)
+                Ok(_) => println!("{}", "env activated!".green()),
+                Err(e) => eprintln!("{}", e.to_string().red())
             }
         }
         PackageManager::Pip => match pip_activate() {
-            Ok(_) => println!("activated!"),
+            Ok(_) => println!("{}", "env activated!".green()),
             
-            Err(e) => eprintln!("{}", e)
+            Err(e) => eprintln!("{}", e.to_string().red())
         }
     }
 }
@@ -32,7 +33,6 @@ fn pip_activate() -> Result<(), String>{
         Ok(output) if output.status.success() => Ok(()),
         Ok(output) => {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            eprintln!("failed to activate: {}", stderr.trim());
             Err(format!("failed to activate: {}", stderr.trim()))
         }
         Err(e) => Err(format!("{}",e))
@@ -84,7 +84,6 @@ fn pip_activate() -> Result<(), String>{
         Ok(output) if output.status.success() => Ok(()),
         Ok(output) => {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            eprintln!("failed to activate: {}", stderr.trim());
             Err(format!("failed to activate: {}", stderr.trim()))
         }
         Err(e) => Err(format!("{}",e))

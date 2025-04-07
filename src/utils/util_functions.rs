@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 use crate::models::models::ProjectConfig;
 use crate::utils::sample_text;
 use std::fs::{self, File};
@@ -35,7 +37,7 @@ pub fn git_init(folder_path: &str) -> std::io::Result<()> {
     if output.status.success() {
         println!("Git repository initialized successfully.");
     } else {
-        println!("Failed to initialize Git repository.");
+        eprintln!("{}", "Failed to initialize Git repository.".red());
     }
 
     Ok(())

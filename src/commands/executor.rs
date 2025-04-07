@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 use crate::models::models::PackageManager;
 use std::process::Command;
 
@@ -8,21 +10,21 @@ pub fn create_venv(project_name: &str, package_manager: &PackageManager, env_nam
             Ok(_) => {
                 if cfg!(target_os = "windows") {
                     match Command::new("python").args(&["-m", "venv", project_name]).output() {
-                        Ok(output) if output.status.success() => println!("venv created!"),
+                        Ok(output) if output.status.success() => println!("{}", "venv created!".red()),
                         Ok(output) => {
                             let stderr = String::from_utf8_lossy(&output.stderr);
-                            eprintln!("failed to create env: {}", stderr.trim());
+                            eprintln!("failed to create env: {}", stderr.trim().red());
                         }
-                        Err(e) => eprintln!("{}", e)
+                        Err(e) => eprintln!("{}", e.to_string().red())
                     }
                 } else {
                     match Command::new("python3").args(&["-m", "venv", project_name]).output() {
-                        Ok(output) if output.status.success() => println!("venv created!"),
+                        Ok(output) if output.status.success() => println!("{}", "venv created!".red()),
                         Ok(output) => {
                             let stderr = String::from_utf8_lossy(&output.stderr);
-                            eprintln!("failed to create env: {}", stderr.trim());
+                            eprintln!("failed to create env: {}", stderr.trim().red());
                         },
-                        Err(e) => eprintln!("{}", e)
+                        Err(e) => eprintln!("{}", e.to_string().red())
                     }
                 };
             }
@@ -36,15 +38,15 @@ pub fn create_venv(project_name: &str, package_manager: &PackageManager, env_nam
                     None => project_name,
                 };
                 match Command::new("conda").args(&["create", "-n", conda_env, "-y"]).output() {
-                    Ok(output) if output.status.success()=> println!("conda env created"),
+                    Ok(output) if output.status.success()=> println!("{}", "conda env created!".green()),
                     Ok(output) => {
                         let stderr = String::from_utf8_lossy(&output.stderr);
-                        eprintln!("failed to create env {}", stderr);
+                        eprintln!("{}: {}", "failed to create env".red(), stderr.red());
                     },
-                    Err(e) => println!("{}", e)
+                    Err(e) => println!("{}", e.to_string().red())
                 }
             }
-            Err(e) => eprintln!("{}", e),
+            Err(e) => eprintln!("{}", e.to_string().red()),
         },
     }
 }
@@ -72,15 +74,15 @@ fn check_venv() -> Result<(), String> {
         }
         Err(e) => {
             if cfg!(target_os = "linux") {
-                eprintln!("   sudo apt install python3-venv");
+                eprintln!("   {}", "sudo apt install python3-venv".yellow());
             } else if cfg!(target_os = "macos") {
-                eprintln!("   brew install python (or reinstall Python)");
+                eprintln!("   {}", "brew install python (or reinstall Python)".yellow());
             } else {
-                eprintln!("   Ensure Python is installed correctly.");
+                eprintln!("   {}", "Ensure Python is installed correctly.".yellow());
             };
             Err(format!(
                 "`venv` is not installed! Try installing it: {}",
-                e
+                e.to_string().yellow()
             ))
         }
     }
@@ -91,13 +93,12 @@ fn check_conda() -> Result<(), String> {
     match check_conda {
         Ok(output) if output.status.success() => {
             let version = String::from_utf8_lossy(&output.stdout);
-            println!("Conda is installed! Version: {}", version.trim());
+            println!("Conda is installed! Version: {}", version.trim().red());
             Ok(())
         },
         Ok(output) => {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            eprintln!("Conda check failed: {}", stderr.trim());
-            Err(format!("Conda check failed: {}", stderr.trim()))
+            Err(format!("Conda check failed: {}", stderr.trim().red()))
         },
         Err(e) => {
             Err(format!("Conda is not installed! Install it from: https://docs.conda.io/en/latest/miniconda.html, {}", e))   
