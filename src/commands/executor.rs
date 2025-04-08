@@ -10,7 +10,7 @@ pub fn create_venv(project_name: &str, package_manager: &PackageManager, env_nam
             Ok(_) => {
                 if cfg!(target_os = "windows") {
                     match Command::new("python").args(&["-m", "venv", project_name]).output() {
-                        Ok(output) if output.status.success() => println!("{}", "venv created!".red()),
+                        Ok(output) if output.status.success() => println!("{}", "venv created!".green()),
                         Ok(output) => {
                             let stderr = String::from_utf8_lossy(&output.stderr);
                             eprintln!("failed to create env: {}", stderr.trim().red());
@@ -19,7 +19,7 @@ pub fn create_venv(project_name: &str, package_manager: &PackageManager, env_nam
                     }
                 } else {
                     match Command::new("python3").args(&["-m", "venv", project_name]).output() {
-                        Ok(output) if output.status.success() => println!("{}", "venv created!".red()),
+                        Ok(output) if output.status.success() => println!("{}", "venv created!".green()),
                         Ok(output) => {
                             let stderr = String::from_utf8_lossy(&output.stderr);
                             eprintln!("failed to create env: {}", stderr.trim().red());
