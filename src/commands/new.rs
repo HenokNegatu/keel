@@ -2,11 +2,15 @@ use crate::commands::executor::create_venv;
 use crate::models::models::{PackageManager, ProjectConfig, ProjectMetaData, ToolSettings};
 use crate::utils::util_functions::create_project_toml;
 use crate::utils::util_functions::{create_folder_and_file, create_gitignore, git_init};
+use colored::Colorize;
 use core::panic;
 use dialoguer::{theme::ColorfulTheme, Input, Select};
-use colored::Colorize;
+use color_eyre::eyre::{Result, WrapErr};
 
-pub fn new() {
+pub fn new() -> Result<()> {
+
+    color_eyre::install()?;
+
     let name = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Project Name?")
         .default("myProject".to_string())
@@ -87,46 +91,41 @@ pub fn new() {
         },
     };
 
-    println!("{}: {}", "Name".blue(), project.metadata.name);
-    println!("{}: {}","Version".blue(), project.metadata.version);
-    println!("{}: {:?}", "Authors".blue(), project.metadata.authors);
-    println!("{}: {}", "License".blue(), project.metadata.license);
-    println!("{}: {}", "Python Version".blue(), project.metadata.python_version);
-
     create_venv(
         &project.metadata.name,
         &project.tool.package_manager,
         &project.tool.conda_env_name,
-    );
+    ).wrap_err("Failed to create virtual env")?;
 
-    match create_folder_and_file(project.metadata.name.as_str()) {
-        Ok(_) => (),
-        Err(err) => eprintln!("Error creating folder and file: {}", err.to_string().red()),
-    }
+    create_folder_and_file(&project.metadata.name).wrap_err("Failed to create folder and file")?;
 
-    match git_init(project.metadata.name.as_str()) {
-        Ok(_) => match create_gitignore(project.metadata.name.as_str()) {
-            Ok(_) => (),
-            Err(err) => println!("Error creating gitignore: {}", err.to_string().red() ),
-        },
-        Err(err) => println!("Error initializing Git: {}", err.to_string().red()),
-    }
-
+    git_init(project.metadata.name.as_str()).wrap_err("Error initializing Git")?;
     
-    match create_project_toml(&project, &project.metadata.name.as_str()) {
-        Ok(_) => {}
-        Err(e) => eprintln!("{}", e.to_string().red()),
-    };
+    create_gitignore(project.metadata.name.as_str()).wrap_err("Error creating gitignore:")?;
+
+    create_project_toml(&project, &project.metadata.name.as_str()).wrap_err("Error creating project.toml")?;
 
     if let Some(env) = &project.tool.conda_env_name {
         println!("Conda Env: {}", env);
     }
+
     println!(
-        "{}: {}", "Package Manager".blue(),
+        "\n{}: {}\n{}: {}\n{}: {:?}\n{}: {}\n{}: {}\n{}: {}",
+        "Name".blue(),
+        project.metadata.name,
+        "Version".blue(),
+        project.metadata.version,
+        "Authors".blue(),
+        project.metadata.authors,
+        "License".blue(),
+        project.metadata.license,
+        "Python Version".blue(),
+        project.metadata.python_version,
+        "Package Manager".blue(),
         match project.tool.package_manager {
             PackageManager::Pip => "Pip",
             PackageManager::Conda => "Conda",
         }
     );
-    println!("{}", "Project created successfully!".green());
+    Ok(())
 }

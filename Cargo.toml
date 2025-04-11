@@ -6,7 +6,9 @@ license = "MIT"
 
 [dependencies]
 clap = { version = "4.5.35", features = ["derive"] }
+color-eyre = "0.6.3"
 colored = "3.0.0"
 dialoguer = "0.11.0"
 serde = { version = "1.0.219", features = ["derive"] }
+thiserror = "2.0.12"
 toml = "0.8.20"
