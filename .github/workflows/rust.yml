@@ -1,0 +1,54 @@
+name: keel
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        rust: [stable ]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ matrix.rust }}
+        components: clippy,rustfmt
+    - name: Run tests
+      run: cargo test --verbose
+    - name: Build
+      run: cargo build --release
+    - name: Package
+      run: cargo package --allow-dirty
+    - uses: actions/upload-artifact@v2
+      with:
+        name: keel-${{ matrix.os }}-${{ matrix.rust }}
+        path: target/release/keel-${{ matrix.os }}-${{ matrix.rust }}.zip
+    - name: Extract Version
+      id: version
+      run: |
+        VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+        echo "::set-output name=VERSION::$VERSION"
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.VERSION }}
+        release_name: "v${{ steps.version.outputs.VERSION }}"
+        draft: false
+        prerelease: true
+        body: "Release version v${{ steps.version.outputs.VERSION }} of keel."
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: target/release/keel-${{ matrix.os }}-${{ matrix.rust }}.zip
+        asset_name: keel-${{ matrix.os }}-${{ matrix.rust }}.zip
+        asset_content_type: application/zip
