@@ -87,3 +87,52 @@ fn check_conda() -> Result<(), VenvError> {
         })?;
     Ok(())
 }
+
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    
+    #[test]
+    fn test_check_venv() {
+        
+        //assuming venv is installed
+        let result = check_venv();
+        assert!(result.is_ok(), "Failed to check venv {:?}", result);
+    }
+
+    #[test]
+    fn test_check_conda() {
+        
+        //assuming conda is installed
+        let result = check_conda();
+        assert!(result.is_ok(), "Failed to check conda: {:?}", result);
+    }
+
+    #[test]
+    fn test_create_venv() {
+        let result = create_venv("test", &PackageManager::Pip, &None);
+        assert!(result.is_ok(), "Failed to create venv: {:?}", result);
+
+        //remove the created venv
+        let _ = Command::new("rm")
+            .args(&["-rf", "test"])
+            .output()
+            .map_err(|e| VenvError::VenvCreationFailed { source: e });
+    }
+
+    #[test]
+    fn test_create_conda() {
+        let result = create_venv("test", &PackageManager::Conda, &None);
+        assert!(result.is_ok(), "Failed to create conda: {:?}", result);
+
+        //remove the created conda env
+        let _ = Command::new("conda")
+            .args(&["env", "remove", "-n", "test", "-y"])
+            .output()
+            .map_err(|e| VenvError::CondaCreationFailed { source: e });
+    }
+
+
+}
