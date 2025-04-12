@@ -48,7 +48,7 @@ pub fn new() -> Result<()> {
 
     let selections = &["pip", "conda"];
     let package_manager_input = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Choose project type")
+        .with_prompt("Choose Package Manager")
         .items(selections)
         .interact()
         .unwrap();
