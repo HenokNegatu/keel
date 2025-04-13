@@ -48,7 +48,7 @@ pub struct ToolSettings {
 }
 
 #[derive(Parser)]
-#[command(name = "keel")]
+#[command(name = "keel", author = "Henok Negatu", version = "v0.1.0-alpha.1", about = "Keel is a cli tool for creating python projects", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
