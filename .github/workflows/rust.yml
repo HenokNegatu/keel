@@ -27,7 +27,7 @@ jobs:
       run: cargo build --release
     - name: Package
       run: cargo package --allow-dirty
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: keel-${{ matrix.os }}-${{ matrix.rust }}
         path: target/release/keel-${{ matrix.os }}-${{ matrix.rust }}.zip
