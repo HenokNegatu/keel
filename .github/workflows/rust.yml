@@ -35,20 +35,14 @@ jobs:
       id: version
       run: |
         VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
-        echo "::set-output name=VERSION::$VERSION"
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: v${{ steps.version.outputs.VERSION }}
-        release_name: "v${{ steps.version.outputs.VERSION }}"
+        tag: v${{ steps.version.outputs.VERSION }}
+        name: "v${{ steps.version.outputs.VERSION }}"
         draft: false
         prerelease: true
         body: "Release version v${{ steps.version.outputs.VERSION }} of keel."
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: target/release/keel-${{ matrix.os }}-${{ matrix.rust }}.zip
-        asset_name: keel-${{ matrix.os }}-${{ matrix.rust }}.zip
-        asset_content_type: application/zip
+        artifacts: target/release/keel-*-*.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
